@@ -188,7 +188,7 @@ def plotModeCoefficients(a, N, dt,colors="black",Path=""):
     plt.rcParams["font.family"] = "DejaVu Serif"
     t = np.linspace(1,N,N)*dt
     npoints =N
-    fig1 = plt.figure(figsize=(20, 12))
+    fig1 = plt.figure(figsize=(20, 12),dpi=300)
     for i in range(9):
         match i:
             case 0:                title = "Basic Flow"
