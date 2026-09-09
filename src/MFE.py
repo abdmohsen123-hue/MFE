@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
-def MFE_Sequence(dt,N,istart,Re=800,Lx=4*np.pi,Lz=2*np.pi,Estart=0.01,a0=[1,0,0.187387,0.040112,0.047047,0,0,0.013188,0]):
+def MFE_Sequence(dt,N,istart,Re=800,Lx=4*np.pi,Lz=2*np.pi,a0=[1,0,0.187387,0.040112,0.047047,0,0,0.013188,0]):
 #-----------------------------------
 # Moehlis-Faisst-Eckhardt model
 #-----------------------------------
@@ -12,7 +12,7 @@ def MFE_Sequence(dt,N,istart,Re=800,Lx=4*np.pi,Lz=2*np.pi,Estart=0.01,a0=[1,0,0.
     a4,a5,a6 = np.zeros(N), np.zeros(N), np.zeros(N)
     a7,a8,a9 = np.zeros(N), np.zeros(N), np.zeros(N)
     
-    a1[0] = a0[0];          # base flow
+    a1[0] = a0[0];   # base flow
     a2[0] = a0[1];
     a3[0] = a0[2];   # streamwise vortex
     a4[0] = a0[3];   # spanwise flow
