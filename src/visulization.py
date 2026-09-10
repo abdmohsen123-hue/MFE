@@ -27,12 +27,12 @@ def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
     grid_normalized=np.full_like(grid,0)
     grid_normalized[mask] = np.log(grid[mask])
     grid_normalized =grid_normalized/np.max(grid_normalized)
-    color_map = cm.RdBu_r(grid_normalized)
+    color_map = cm.coolwarm(grid_normalized)
     print(color_map.shape)
     color="#000204"
 
 
-    fig, ax = plt.subplots(dpi=300)
+    fig, ax = plt.subplots(dpi=500)
     it =0
     for i in range(Nd):
         for j in range(Nd):
@@ -44,7 +44,7 @@ def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
                 ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
                 
                 #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
-                ax.scatter(j + 0.5, i + 0.5, s=3000/Nd, color=color_map[i,j], alpha=0.6,marker="s")
+                ax.scatter(j + 0.5, i + 0.5, s=1000/Nd, color=color_map[i,j], alpha=1,marker="s")
                 it+=1
     ax.set_xlabel("Δk",fontsize=14)
     ax.set_ylabel("Δε",fontsize=14)
@@ -233,7 +233,7 @@ def plotClusterMembership(Path,CPT, npoints, dt,k=-1):
     plt.savefig(os.path.join(Path, f"Cluster_Membership.png"))
     plt.show()
 
-def plotDissipationAndEnergy(DE,N,dt,colors="black",Path=""):
+def plot_DE_VS_Time(DE,N,dt,colors="black",Path=""):
     plt.rcParams["font.family"] = "DejaVu Serif"
     t = np.linspace(1,N,N)*dt
     D = DE[:, 0]
@@ -247,7 +247,7 @@ def plotDissipationAndEnergy(DE,N,dt,colors="black",Path=""):
         ax1.scatter(t[:npoints], D[:npoints],c=colors[:npoints], S=1)
     ax1.set_xlabel("t", fontsize=18,fontweight='bold')
     ax1.set_ylabel("ε", fontsize=18,fontweight='bold')
-    ax1.set_title("Dissipation Rate Over Time", fontsize=18,fontweight='bold')
+    #ax1.set_title("Dissipation Rate Over Time", fontsize=18,fontweight='bold')
     plt.xticks(fontweight='bold',fontsize=14)
     plt.yticks(fontweight='bold',fontsize=14)
     ax1.set_xlim(0,N*dt)
@@ -257,15 +257,15 @@ def plotDissipationAndEnergy(DE,N,dt,colors="black",Path=""):
         ax2.plot(t[:npoints], E[:npoints],c="black", linewidth=0.5)
     else:
         ax2.scatter(t[:npoints], E[:npoints],c=colors[:npoints], S=1)
-    ax2.set_xlabel("t", fontsize=18,fontweight='bold')
+    #ax2.set_xlabel("t", fontsize=18,fontweight='bold')
     ax2.set_ylabel("k", fontsize=18,fontweight='bold')
-    ax2.set_title("Energy Over Time", fontsize=18,fontweight='bold')
+    #ax2.set_title("Energy Over Time", fontsize=18,fontweight='bold')
     ax2.grid(False)
     ax2.set_xlim(0,N*dt)
     plt.xticks(fontweight='bold',fontsize=14)
     plt.yticks(fontweight='bold',fontsize=14)
     plt.tight_layout()
-    plt.savefig(os.path.join(Path, f"Dissipation_Energy.png"))
+    #plt.savefig(os.path.join(Path, f"Dissipation_Energy.png"))
     plt.show()
 
 def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):

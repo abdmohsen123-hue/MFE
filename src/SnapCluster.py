@@ -101,7 +101,7 @@ class SnapCluster:
         t2=time.perf_counter()
         print(f"Time for LeichtNewman:{t2-t1}")
         return self.CPT
-    def repeated_leicht_newman_algorithm(self,Cluster_size=5,fine_tune=False,k=1,sim_time=np.inf,sample_time=1,U_scale=0):
+    def repeated_leicht_newman_algorithm(self,Cluster_size=2,fine_tune=False,k=1,sim_time=np.inf,sample_time=1,U_scale=0):
         #Inputs: CP: cluster assignment
         #Outputs: CPT: list of cluster assignments for each iteration of reclustering
         t1=time.perf_counter()
