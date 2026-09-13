@@ -14,7 +14,8 @@ class SnapCluster:
         if U_scale:
             A,Box,P,mini,maxi,delta,dt_U_local_inv_dx=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
             self.dt_U_local_inv_dx=dt_U_local_inv_dx
-        A,Box,P,mini,maxi,delta=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
+        else:
+            A,Box,P,mini,maxi,delta=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
 
         t2=time.perf_counter()
         print(f"Time for Ulam-Galerkin Disctrization:{t2-t1}")
