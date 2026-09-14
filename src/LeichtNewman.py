@@ -122,7 +122,7 @@ if __name__ == '__main__':
     plt.show()
     c = np.zeros(len(B.toarray()), dtype=int)
 
-    F,c = LeichtNewman_sparse(B) # Leicht-Newman algorithm
+    F,c = LeichtNewman(B) # Leicht-Newman algorithm
     Q = np.zeros((nT,nT),dtype=int)
     for i,j in enumerate(sum(F,[])): Q[i,j] = 1
 
