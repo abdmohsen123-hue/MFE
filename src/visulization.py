@@ -2,6 +2,7 @@ from src.helper import *
 from src.Dijkstras import *
 import matplotlib.colors as colors
 from matplotlib.cm import ScalarMappable
+from matplotlib.widgets import Slider
 def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
     Nd=Disctrize_box_size
     x=Data.copy()      
@@ -13,9 +14,9 @@ def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
     grid = np.zeros((Nd, Nd))
 
     for i in range(len(idx)):
-        E_idx = idx[i, 0]
-        d_idx = idx[i, 1]
-        grid[E_idx,d_idx] += 1   
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1   
     # normalize (optional)
     #grid = grid / np.max(grid)
     vmin_1, vmax_1 = np.min(grid), np.max(grid)
@@ -344,4 +345,92 @@ def plot_cluster_distance_matrix(Path,CPT, Data,k=-1):
     plt.xlabel('Cluster')
     plt.ylabel('Cluster')
     plt.savefig(os.path.join(Path, f"Distance_Matrix_Clusters.png"))
+    plt.show()
+def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
+    eigen_values, eigen_vectors = eig(P)
+    idx = np.argsort(abs(eigen_values))[::-1]
+    eigen_values_sorted = np.array(eigen_values)[idx]
+    eigen_vectors_sorted = np.array(eigen_vectors)[:, idx]
+
+    Nd=discretization_box_size
+    x=Data.copy()      
+    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
+    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
+    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
+    idx = np.floor((x - mini) / delta).astype(int)
+    grid = np.zeros((Nd, Nd))
+
+    for i in range(len(idx)):
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1
+        
+    grid_eigen_vector_values = np.zeros((len(eigen_values_sorted), Nd, Nd))
+    grid_log_eigen_vector_values = np.ones((len(eigen_values_sorted), Nd, Nd))*np.inf
+
+    for k in range(len(eigen_values_sorted)):
+        it = 0
+        for i in range(Nd):
+            for j in range(Nd):
+                if grid[i, j] > 0:
+                    grid_eigen_vector_values[k, i, j] = np.abs(eigen_vectors_sorted[it, k])
+                    if grid_eigen_vector_values[k, i, j]> 0:
+                        grid_log_eigen_vector_values[k, i, j] = np.log(grid_eigen_vector_values[k, i, j])  
+                    it += 1
+    #Plot
+    plt.close('all')
+    fig, ax = plt.subplots()
+    color="#000204"
+    for i in range(Nd):
+        for j in range(Nd):
+            if grid[i, j] > 0:
+                # draw cell edges
+                ax.plot([j, j+1], [i, i], linewidth=0.1,c=color)
+                ax.plot([j, j+1], [i+1, i+1], linewidth=0.1,c=color)
+                ax.plot([j, j], [i, i+1], linewidth=0.1,c=color)
+                ax.plot([j+1, j+1], [i, i+1], linewidth=0.1,c=color)
+                
+    #color bar
+    data = grid_log_eigen_vector_values[eigen_value]
+    mask = data!=0
+    vmin_1 = np.min(data[mask])
+    vmax_1 = np.max(data[mask])
+    norm_1 = colors.Normalize(vmin_1, vmax_1)
+    cbar = fig.colorbar(ScalarMappable(norm=norm_1, cmap='Blues'), ax=ax)
+
+
+    plt.subplots_adjust(bottom=0.25)
+    slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03])
+    slider = Slider(
+        slider_ax,
+        'Eigenvalue',
+        0,
+        len(eigen_values_sorted) - 1,
+        valinit=0,
+        valstep=1
+    )
+
+
+    color_map = np.zeros((Nd, Nd, 4))
+    im = ax.imshow(
+        grid_log_eigen_vector_values[eigen_value],
+        cmap='Blues',
+        origin='lower',
+        extent=[0, Nd, 0, Nd]
+    )
+    def update(val):
+        a = int(slider.val)
+        data = grid_log_eigen_vector_values[a]
+        mask = data<0
+        vmin_1 = np.min(data[mask])
+        vmax_1 = np.max(data[mask])
+        norm_1 = colors.Normalize(vmin_1, vmax_1)
+
+
+        im.set_data(data)
+        im.set_norm(norm_1)
+        cbar.update_normal(im)
+        fig.canvas.draw_idle()
+
+    slider.on_changed(update)
     plt.show()

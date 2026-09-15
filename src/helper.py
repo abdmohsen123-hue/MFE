@@ -12,15 +12,15 @@ import matplotlib.colors as mcolors
 
 def create_case_folder(dt,N,Re,Lx,Lz):
 
-    folder_name = f"Case_dt{dt}_N{N}_Re{Re}_Lx{Lx:.2f}_Lz{Lz:.2f}"
+    folder_name = f"C:\\Users\\alsubaaa\\Desktop\\KAUST\\PhD\\Code\\Result\\Case_dt{dt}_N{N}_Re{Re}_Lx{Lx:.2f}_Lz{Lz:.2f}"
     
     # Check if folder exists
-    if not os.path.exists(f"result/{folder_name}"):
-        os.makedirs(f"result/{folder_name}")
-        return f"result/{folder_name}"
+    if not os.path.exists(folder_name):
+        os.makedirs(folder_name)
+        return folder_name
     
     # If exists, find the next available number
-    return f"result/{folder_name}"
+    return folder_name
 
 def cluster_transition_matrix(CPT,k=-1,sim=np.inf,sample=1,dt_U_local_inv_dx=False):  #Make the adjacency matrix for reclustering based on the cluster assignments of the previous iteration
     CP=CPT[k]
