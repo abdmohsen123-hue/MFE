@@ -5,9 +5,10 @@ from community import best_partition
 import matplotlib.pyplot as plt
 from scipy.sparse import coo_matrix
 #vincent's blondel
+
 def my_network(PPP):
     GG = nx.Graph()  # or DiGraph, MultiGraph, MultiDiGraph, etc
-    for t in PPP: GG.add_weighted_edges_from([t])
+    for u,v,w in PPP: GG.add_weighted_edges_from([(u, v, w)])
     return GG 
 
 def Louvain(G):

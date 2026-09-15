@@ -1,9 +1,10 @@
 
 
 from src.MST import MST
-from src.LeichtNewman import LeichtNewman
+from src.LeichtNewman import *
 from src.helper import *
 from src.MyUlamGalerkin import ulamGalerkin
+from src.Louvain import *
 import numpy as np
 import heapq
 from scipy.linalg import eig
@@ -86,6 +87,51 @@ class SnapCluster:
         )
 
 #Clustering algorithms
+    def Louvain(self,sim_time=np.inf,sample_time=1,U_scale=0):
+        t1=time.perf_counter()
+        CP=self.CPT[-1]
+        P=cluster_transition_matrix(self.CPT,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale)
+        G = P2G(P)
+        c,unique_c = Louvain(G)
+        C=list(c.values())
+        CP2=np.zeros(len(CP),dtype=int)
+        for i in range(len(C)):
+            CP2[np.where(CP==i)]=C[i]
+        self.CPT.append(CP2)
+        print(F"Number of clusters: {max(CP2)+1}")
+        t2=time.perf_counter()
+        print(f"Time for Louvain:{t2-t1}")
+        return self.CPT
+    def repeated_louvain_algorithm(self,Cluster_size=2,sim_time=np.inf,sample_time=1,U_scale=0):
+            #Inputs: CP: cluster assignment
+            #Outputs: CPT: list of cluster assignments for each iteration of reclustering
+            t1=time.perf_counter()
+            CP=self.CPT[-1]
+            clustersize=np.zeros(max(CP))
+            clustersize[0]=max(CP)+1
+            it=0
+            while it < clustersize[0] : 
+                P=cluster_transition_matrix(self.CPT,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale)
+                G = P2G(P)
+                c,unique_c = Louvain(G)
+                C=list(c.values())    #C here tells cluster_1-Cluster_2 ID
+                CP2=np.zeros(len(CP),dtype=int)
+                for i in range(len(C)):
+                    CP2[CP == i] = C[i]         #CP2 here has to give me point-cluster_2 ID 
+                it+=1
+                clustersize[it]=max(CP2)+1
+                if clustersize[it]==clustersize[it-1] or clustersize[it-1]<=Cluster_size:
+                    print(f"Louvain Cluster assignments converged at iteration: {it}")
+                    print(F"Number of clusters: {max(CP2)+1}")
+                    t2=time.perf_counter()
+                    print(f"Time for Louvain:{t2-t1}")
+                    return self.CPT
+                self.CPT.append(CP2)
+                CP=self.CPT[-1]
+                print(f"Louvain iteration: {it}")
+                print(f"Number of old clusters: {len(c)}")
+                print(f"Number of new clusters: {max(CP2)+1}")
+        
     def leicht_newman(self,data,fine_tune=False):
         return LeichtNewman(data,fine_tune)
     def leicht_newman_algorithm(self,fine_tune=False,sim_time=np.inf,sample_time=1,U_scale=0):
@@ -154,7 +200,7 @@ class SnapCluster:
         while Cluster_size_current>Cluster_size:
             P=cluster_transition_matrix(self.CPT,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale) 
             Cluster_size_current=Cluster_size_current-decrement #
-            if Cluster_size_current%100==0:
+            if Cluster_size_current%10==0:
                 print(f"Current cluster size: {Cluster_size_current}")
             if Cluster_size_current<Cluster_size:
                 Cluster_size_current=Cluster_size

@@ -15,14 +15,17 @@ def ulamGalerkin(Data,Nd=5,sim=np.inf,sample=1,ulam_scaled=False,ulam_dt=0.05): 
     for i in range(len(unique_rows)):
         bx_to_p_dict[tuple(unique_rows[i])]= np.where(inverse_indices == i)[0]
 
-    if ulam_scaled:
-        U_local=np.zeros(len(unique_rows))
+    
     M=np.zeros((len(unique_rows),len(unique_rows)))     #start the markov matrix
     if np.isfinite(sim):
         boundary = set(np.arange(sim, len(inverse_indices), sample))
         #print(boundary)
     else:
         boundary = set()
+
+    if ulam_scaled:
+            U_local=np.zeros(len(unique_rows))
+
     for i in range(len(inverse_indices)-1):
         if i+1 in boundary:
             continue

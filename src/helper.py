@@ -22,7 +22,7 @@ def create_case_folder(dt,N,Re,Lx,Lz):
     # If exists, find the next available number
     return f"result/{folder_name}"
 
-def cluster_transition_matrix(CPT,k=-1,sim=np.inf,sample=1,dt_U_local_inv_dx=None):  #Make the adjacency matrix for reclustering based on the cluster assignments of the previous iteration
+def cluster_transition_matrix(CPT,k=-1,sim=np.inf,sample=1,dt_U_local_inv_dx=False):  #Make the adjacency matrix for reclustering based on the cluster assignments of the previous iteration
     CP=CPT[k]
     if np.isfinite(sim):
         boundary = set(np.arange(sim, len(CP), sample))
@@ -35,7 +35,7 @@ def cluster_transition_matrix(CPT,k=-1,sim=np.inf,sample=1,dt_U_local_inv_dx=Non
         if i+1 in boundary:
             continue
         M[CP[i+1],CP[i]]=M[CP[i+1],CP[i]]+1 #transition from j to i 
-    if dt_U_local_inv_dx is not None:
+    if dt_U_local_inv_dx:
         idx = np.diag_indices_from(M)
         M[idx] *= dt_U_local_inv_dx
         M=np.floor(M)
