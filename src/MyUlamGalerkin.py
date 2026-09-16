@@ -44,12 +44,12 @@ def ulamGalerkin(Data,Nd=5,sim=np.inf,sample=1,ulam_scaled=False,ulam_dt=0.05): 
         M[idx] *= dt_U_local_inv_dx
         M=np.floor(M)
 
-    M = M / M.sum(axis=0,keepdims=True)  #Normalize over the rows where sum of columns equal to 1 (j>>>all i)
+    MS = M / M.sum(axis=0,keepdims=True)  #Normalize over the rows where sum of columns equal to 1 (j>>>all i)
     if ulam_scaled:
     
     #print("changed")
-        return M,bx_to_p_dict,p_to_bx_dict,mini,maxi,delta,dt_U_local_inv_dx   #Return markov matrix, a dictionary of box:[snapshots,,,], a list of snapshot assignment to boxes P:[box,,,,]
-    return M,bx_to_p_dict,p_to_bx_dict,mini,maxi,delta
+        return MS,M,bx_to_p_dict,p_to_bx_dict,mini,maxi,delta,dt_U_local_inv_dx   #Return markov matrix, a dictionary of box:[snapshots,,,], a list of snapshot assignment to boxes P:[box,,,,]
+    return MS,M,bx_to_p_dict,p_to_bx_dict,mini,maxi,delta
 
 if __name__ == '__main__':
 

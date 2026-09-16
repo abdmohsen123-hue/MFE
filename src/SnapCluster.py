@@ -13,10 +13,10 @@ class SnapCluster:
     def __init__(self,Data,Disctrize_box_size,sim_time=np.inf,sample_time=1,U_scale=False,init_dt=0.05):
         t1=time.perf_counter()
         if U_scale:
-            A,Box,P,mini,maxi,delta,dt_U_local_inv_dx=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
+            A,M,Box,P,mini,maxi,delta,dt_U_local_inv_dx=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
             self.dt_U_local_inv_dx=dt_U_local_inv_dx
         else:
-            A,Box,P,mini,maxi,delta=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
+            A,M,Box,P,mini,maxi,delta=  ulamGalerkin(Data,Disctrize_box_size,sim=sim_time,sample=sample_time,ulam_scaled=U_scale,ulam_dt=init_dt)
 
         t2=time.perf_counter()
         print(f"Time for Ulam-Galerkin Disctrization:{t2-t1}")
@@ -34,6 +34,7 @@ class SnapCluster:
         self.maxi=maxi
         self.BoxVolumeList=[(mini[0]+a*delta[0],mini[1]+b*delta[1]) for a,b in list(Box.keys())]
         self.delta=delta
+        self.M=M
         
 
 

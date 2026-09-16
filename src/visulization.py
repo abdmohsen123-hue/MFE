@@ -397,7 +397,7 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
     vmax_1 = np.max(data[mask])
     norm_1 = colors.Normalize(vmin_1, vmax_1)
     cbar = fig.colorbar(ScalarMappable(norm=norm_1, cmap='Blues'), ax=ax)
-
+    ax.set_title(f"Eigenvalue: {abs(eigen_values_sorted[eigen_value]):.4f}")
 
     plt.subplots_adjust(bottom=0.25)
     slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03])
@@ -430,6 +430,7 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
         im.set_data(data)
         im.set_norm(norm_1)
         cbar.update_normal(im)
+        ax.set_title(f"Eigenvalue: {abs(eigen_values_sorted[a]):.4f}")
         fig.canvas.draw_idle()
 
     slider.on_changed(update)
