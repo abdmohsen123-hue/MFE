@@ -1,6 +1,6 @@
 from src.helper import *
 
-def dijkstra_shortest_path(CPT,source,target,cluster=-1,sim=np.inf,sample=1,U_scale=0):
+def dijkstra_shortest_path(CPT,source,target,cluster=-1,sim=np.inf,sample=1,U_scale=False):
     A=cluster_transition_matrix(CPT,sim=sim,sample=sample,k=cluster,dt_U_local_inv_dx=U_scale)
     W = np.full_like(A, np.inf, dtype=float)
     mask = A > 0

@@ -173,6 +173,7 @@ def johnsons_algorithm(A, cap=0):
             for v in scc_with_s:
                 blocked[v] = False
             circuit(s, s, adj, blocked, B, stack, cycles)
+
     cycles_probablity =[]
     for cycle in cycles:
         prob=1.0

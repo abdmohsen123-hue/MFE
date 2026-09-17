@@ -163,3 +163,51 @@ def solve_a0(Dstar, Estar, Lx=1.75*np.pi, Lz=1.2*np.pi, method='L-BFGS-B'):
 
     res = minimize(objective, a_init, jac=gradient, method=method)
     return res.x, res
+def plot_cycles_period(Cycles,Data,Disctrize_box_size=50,period=2):
+    
+    cycles_period=[]
+    for i,cycle in enumerate(Cycles):
+        if len(cycle[0])-1==period:
+            cycles_period.append(cycle)
+    print(len(cycles_period))
+    Nd=Disctrize_box_size
+    x=Data.copy()      
+    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
+    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
+    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
+    idx = np.floor((x - mini) / delta).astype(int)
+
+    grid = np.zeros((Nd, Nd))
+
+    for i in range(len(idx)):
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1 
+
+
+    color="#000204"
+    fig, ax = plt.subplots(dpi=500)
+    it =0
+    for i in range(Nd):
+        for j in range(Nd):
+            if grid[i, j] > 0:
+                # draw cell edges
+                ax.plot([j, j+1], [i, i], linewidth=1,c=color)
+                ax.plot([j, j+1], [i+1, i+1], linewidth=1,c=color)
+                ax.plot([j, j], [i, i+1], linewidth=1,c=color)
+                ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
+                
+                ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                it+=1
+    c  = cm.tab20(np.linspace(0, 1, len(cycles_period)))
+    for cycle,prob in cycles_period:
+        for box in cycle:
+            it=0
+            for i in range(Nd):
+                for j in range(Nd):
+                    if grid[i, j] > 0:
+                        if it==box:
+                            ax.scatter(j + 0.5, i + 0.5, s=2000/Nd, color=c[cycles_period.index((cycle,prob))], alpha=1,marker="s")
+                        it+=1
+    ax.set_xlabel("Δk",fontsize=14)
+    ax.set_ylabel("Δε",fontsize=14)
