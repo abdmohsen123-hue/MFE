@@ -88,7 +88,7 @@ class SnapCluster:
         )
 
 #Clustering algorithms
-    def Louvain(self,sim_time=np.inf,sample_time=1,U_scale=0):
+    def louvain_algorithm(self,sim_time=np.inf,sample_time=1,U_scale=0):
         t1=time.perf_counter()
         CP=self.CPT[-1]
         P=cluster_transition_matrix(self.CPT,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale)

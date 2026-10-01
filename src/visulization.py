@@ -3,6 +3,8 @@ from src.Dijkstras import *
 import matplotlib.colors as colors
 from matplotlib.cm import ScalarMappable
 from matplotlib.widgets import Slider
+from matplotlib.lines import Line2D
+
 def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
     Nd=Disctrize_box_size
     x=Data.copy()      
@@ -69,29 +71,47 @@ def plot_box_transition_matrix(CPT,k=-1,sim_time=np.inf,sample_time=1):
 def plot_cluster_centers(CPT,Data,k=-1,threshold=1,Path=''):
     CP=CPT[k]
     N=k
-    extremePoints, critical_points = extreme_points(Data, threshold)
+    #extremePoints, critical_points = extreme_points(Data, threshold)
     CC=cluster_centroids(CPT,Data,k=N)
     colors,c = cluster_colors(CPT,k=N)
     nclust = len(np.unique(CP))
-    plt.figure(figsize=(8, 8))
-    plt.scatter(Data[:, 1], Data[:, 0], s=5, c=colors)
-    plt.xlabel("Energy")
-    plt.ylabel("Dissipation")
-    plt.title(f"Cluster Centers, number of clusters: {nclust}")
+    plt.figure(figsize=(10, 8),dpi=1000)
+    plt.scatter(Data[:, 1], Data[:, 0], s=5, c=colors,alpha=0.5)
+    plt.xlabel("Energy, k",fontsize=14)
+    plt.ylabel("Dissipation rate, ε",fontsize=14)
+    #plt.title(f"Cluster Centers, number of clusters: {nclust}")
+    
     for i in range(nclust):
-        plt.scatter(CC[i,1], CC[i,0],s=200,facecolors="red")
+        #plt.scatter(CC[i,1], CC[i,0],s=100,facecolors=c[i])
         plt.text(CC[i,1], CC[i,0], str(i),
-            color='white',
+            color='black',
             ha='center',
             va='center',
-            fontsize=8,
+            fontsize=12,
             weight='bold',
         )
+    legend_elements = [
+        Line2D(
+            [0], [0],
+            marker='o',
+            color='w',
+            label=f'{i}',
+            markerfacecolor=c[i],
+            markersize=8
+        )
+        for i in range(nclust)
+    ]
+
+    plt.legend(
+        handles=legend_elements,
+        title="Community",
+        loc="best"
+    )
     #plt.ylim(Data[:, 0].min() - 0.1, Data[:, 0].max() + 0.1)
     #plt.xlim(Data[:, 1].min() - 0.1, Data[:, 1].max() + 0.1)
     plt.tight_layout()
-    plt.axvline(x=critical_points[1], color='red', linestyle='--', label='Critical Point')
-    plt.axhline(y=critical_points[0], color='red', linestyle='--', label='Critical Point')
+    #plt.axvline(x=critical_points[1], color='red', linestyle='--', label='Critical Point')
+    #plt.axhline(y=critical_points[0], color='red', linestyle='--', label='Critical Point')
     if Path!="":
         plt.savefig(os.path.join(Path, f"Cluster_Centers_nclust={nclust}.png"))
     plt.show()
@@ -129,7 +149,7 @@ def plot_markov_chain(CPT,k=-1, threshold=0,type="CPT",sim_time=np.inf,sample_ti
                 if p > threshold:
                     G.add_edge(i, j, weight=p)
         # Layout
-        pos = nx.shell_layout(G)
+        pos = nx.spring_layout(G,k=2.0,iterations=500,seed=42)
         plt.figure(figsize=(8,8))
         # Node colors
         c = cm.tab20(np.linspace(0, 1, len(G.nodes())))
@@ -270,18 +290,18 @@ def plot_DE_VS_Time(DE,N,dt,colors="black",Path=""):
     plt.show()
 
 def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):
-    CP=CPT[k]
-    spp=dijkstra_shortest_path(CP,start,end)
+    
+    spp=dijkstra_shortest_path(CPT,start,end,cluster=k)
     spp=list(spp[0])
     #print(spp)
-    CC=cluster_centroids(CP,data)
-    colors,ci = cluster_colors(CP)
-    nclust = len(np.unique(CP))
+    CC=cluster_centroids(CPT,data)
+    colors,ci = cluster_colors(CPT)
+    nclust = len(np.unique(CPT[k]))
     plt.figure(figsize=(12, 8))
     for i in spp:
         plt.scatter(
-            data[CP == i, 1],
-            data[CP == i, 0],
+            data[CPT[k] == i, 1],
+            data[CPT[k] == i, 0],
             s=5,
             color=ci[i],
         )
@@ -290,8 +310,8 @@ def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):
         if np.isin(i,spp): 
             continue
         plt.scatter(
-        data[CP == i, 1],
-        data[CP == i, 0],
+        data[CPT[k] == i, 1],
+        data[CPT[k] == i, 0],
         s=5,
         color="lightgray",
         )
@@ -379,7 +399,7 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
                     it += 1
     #Plot
     plt.close('all')
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(dpi=500)
     color="#000204"
     for i in range(Nd):
         for j in range(Nd):
@@ -399,18 +419,17 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
     cbar = fig.colorbar(ScalarMappable(norm=norm_1, cmap='Blues'), ax=ax)
     ax.set_title(f"Eigenvalue: {abs(eigen_values_sorted[eigen_value]):.4f}")
 
-    plt.subplots_adjust(bottom=0.25)
-    slider_ax = plt.axes([0.2, 0.1, 0.6, 0.03])
+    plt.subplots_adjust(left=0.15)
+    slider_ax = plt.axes([0, 0.2, 0.03, 0.6])
     slider = Slider(
         slider_ax,
         'Eigenvalue',
         0,
         len(eigen_values_sorted) - 1,
         valinit=0,
-        valstep=1
+        valstep=1,
+        orientation='vertical'
     )
-
-
     color_map = np.zeros((Nd, Nd, 4))
     im = ax.imshow(
         grid_log_eigen_vector_values[eigen_value],
@@ -430,8 +449,112 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
         im.set_data(data)
         im.set_norm(norm_1)
         cbar.update_normal(im)
-        ax.set_title(f"Eigenvalue: {abs(eigen_values_sorted[a]):.4f}")
+        ax.set_xlabel("Δk",fontsize=14)
+        ax.set_ylabel("Δε",fontsize=14)
+        ax.set_title(f"Eigenvalue, λ: {abs(eigen_values_sorted[a]):.4f}")
         fig.canvas.draw_idle()
-
     slider.on_changed(update)
     plt.show()
+def plot_dijkstra_shortest_path(CPT,Data,source,target,Disctrize_box_size=50):
+
+    path,prob =dijkstra_shortest_path(CPT,source,target)
+
+    Nd=Disctrize_box_size
+    x=Data.copy()      
+    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
+    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
+    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
+    idx = np.floor((x - mini) / delta).astype(int)
+
+    grid = np.zeros((Nd, Nd))
+
+    for i in range(len(idx)):
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1 
+    color="#000204"
+    fig, ax = plt.subplots(figsize=(8, 8),dpi=500)
+    
+    it =0
+    for i in range(Nd):
+        for j in range(Nd):
+            if grid[i, j] > 0:
+                # draw cell edges
+                ax.plot([j, j+1], [i, i], linewidth=1,c=color)
+                ax.plot([j, j+1], [i+1, i+1], linewidth=1,c=color)
+                ax.plot([j, j], [i, i+1], linewidth=1,c=color)
+                ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
+                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                it+=1
+    c  = ["green"]
+    for i in range(len(path)-2):
+        c.append("lightblue")
+    c.append("red")
+    for box in path:
+        it=0
+        for i in range(Nd):
+            for j in range(Nd):
+                if grid[i, j] > 0:
+                    if it==box:
+                        ax.scatter(j + 0.5, i + 0.5, s=1500/(Nd), color=c[path.index(box)], alpha=1,marker="s")
+                        
+                    it+=1
+    ax.set_xlabel("Δk",fontsize=14)
+    ax.set_ylabel("Δε",fontsize=14)
+    #ax.plot((Data[:, 1]-mini[1])/delta[1], (Data[:, 0]-mini[0])/delta[0],c="black",zorder=1,linewidth=0.3)
+
+def plot_cycles_period(Cycles,Data,Disctrize_box_size=50,period=2):
+    
+    cycles_period=[]
+    for i,cycle in enumerate(Cycles):
+        if len(cycle[0])-1==period and len(cycles_period)<1:
+            cycles_period.append(cycle)
+    
+    #print(len(cycles_period))
+    #cycles_period=heapq.nlargest(50, cycles_period, key=lambda x: x[1])
+    #print(min(cycles_period,key =lambda x:x[1])[1])
+    Nd=Disctrize_box_size
+    x=Data.copy()      
+    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
+    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
+    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
+    idx = np.floor((x - mini) / delta).astype(int)
+
+    grid = np.zeros((Nd, Nd))
+
+    for i in range(len(idx)):
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1 
+
+
+    color="#000204"
+    fig, ax = plt.subplots(figsize=(8, 8),dpi=300)
+    it =0
+    for i in range(Nd):
+        for j in range(Nd):
+            if grid[i, j] > 0:
+                # draw cell edges
+                ax.plot([j, j+1], [i, i], linewidth=1,c=color)
+                ax.plot([j, j+1], [i+1, i+1], linewidth=1,c=color)
+                ax.plot([j, j], [i, i+1], linewidth=1,c=color)
+                ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
+                
+                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                it+=1
+    c  = cm.tab20(np.linspace(0, 1, len(cycles_period)))
+
+    for cycle,prob in cycles_period:
+        #print(cycle)
+        for box in cycle:
+            it=0
+            for i in range(Nd):
+                for j in range(Nd):
+                    if grid[i, j] > 0:
+                        if it==box:
+                            ax.scatter(j + 0.5, i + 0.5, s=1500/(Nd), color=c[cycles_period.index((cycle,prob))], alpha=1,marker="s")
+                            
+
+                        it+=1
+    ax.set_xlabel("Δk",fontsize=14)
+    ax.set_ylabel("Δε",fontsize=14)
