@@ -46,7 +46,7 @@ def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
                 ax.plot([j, j], [i, i+1], linewidth=1,c=color)
                 ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
                 
-                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
                 ax.scatter(j + 0.5, i + 0.5, s=1000/Nd, color=color_map[i,j], alpha=1,marker="s")
                 it+=1
     ax.set_xlabel("Δk",fontsize=14)
@@ -399,7 +399,7 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
                     it += 1
     #Plot
     plt.close('all')
-    fig, ax = plt.subplots(dpi=500)
+    fig, ax = plt.subplots()
     color="#000204"
     for i in range(Nd):
         for j in range(Nd):
