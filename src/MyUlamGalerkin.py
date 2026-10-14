@@ -36,8 +36,10 @@ def ulamGalerkin(Data,Nd=5,sim=np.inf,sample=1,ulam_scaled=False,ulam_dt=0.05): 
         else:
             M[inverse_indices[i+1],inverse_indices[i]]=M[inverse_indices[i+1],inverse_indices[i]]+1
     if ulam_scaled:
-        U_local=U_local/np.diag(M)[0]
-        no_self_transition_idx=U_local==0
+        diagM = np.diag(M).copy()
+        diagM[diagM == 0] = 1.0
+        U_local = U_local / diagM
+        no_self_transition_idx = U_local == 0
         dt_U_local_inv_dx=U_local*(ulam_dt/np.linalg.norm(delta))
         dt_U_local_inv_dx[no_self_transition_idx]=1
         idx = np.diag_indices_from(M)

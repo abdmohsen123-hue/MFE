@@ -54,6 +54,17 @@ def plot_disctrized_phase_space(Data,Disctrize_box_size=10):
     #ax.set_title(f"Partitioning of the k-ε space")
     #ax.set_facecolor("#FCFBEA")
     #fig.colorbar(sm1, ax=ax, orientation='vertical', location='right',ticks=tick_values_1)
+def plot_fill_pattern(A):
+    P0M=cluster_transition_matrix(A.CPT)
+    #P0M=A.P
+    fig_trans = plt.figure(dpi=1000)
+    ax_trans = plt.gca()
+    im_trans = ax_trans.imshow(P0M, cmap='Blues',norm=mcolors.LogNorm(vmin=1e-6, vmax=0.5))
+    ax_trans.set_xlabel('From Box',fontsize=14)
+    ax_trans.set_ylabel('To Box',fontsize=14)
+    ax_trans.set_ylim(P0M.shape[0],-1)
+    ax_trans.set_xlim(-1, P0M.shape[1])
+    plt.show()
 def plot_box_transition_matrix(CPT,k=-1,sim_time=np.inf,sample_time=1):
     Ap=cluster_transition_matrix(CPT,k,sim=sim_time,sample=sample_time)
     fig_trans = plt.figure(figsize=(10, 8),dpi=500)
@@ -315,16 +326,7 @@ def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):
         s=5,
         color="lightgray",
         )
-        '''
-    for i in spp:
-        plt.scatter(CC[i,1], CC[i,0],s=50,facecolors="red")
-        plt.text(CC[i,1], CC[i,0], str(i),
-            color='white',
-            ha='center',
-            va='center',
-            fontsize=8,
-            weight='bold',
-        )'''
+
     for i in spp:
         plt.scatter(CC[i,1], CC[i,0],s=200,facecolors="red")
         plt.text(CC[i,1], CC[i,0], str(i),
@@ -507,10 +509,9 @@ def plot_cycles_period(Cycles,Data,Disctrize_box_size=50,period=2):
     
     cycles_period=[]
     for i,cycle in enumerate(Cycles):
-        if len(cycle[0])-1==period and len(cycles_period)<1:
+        if len(cycle[0])==period :#and len(cycles_period)<1:
             cycles_period.append(cycle)
-    
-    #print(len(cycles_period))
+            print(cycle)
     #cycles_period=heapq.nlargest(50, cycles_period, key=lambda x: x[1])
     #print(min(cycles_period,key =lambda x:x[1])[1])
     Nd=Disctrize_box_size
@@ -540,7 +541,7 @@ def plot_cycles_period(Cycles,Data,Disctrize_box_size=50,period=2):
                 ax.plot([j, j], [i, i+1], linewidth=1,c=color)
                 ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
                 
-                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
                 it+=1
     c  = cm.tab20(np.linspace(0, 1, len(cycles_period)))
 

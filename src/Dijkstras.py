@@ -89,3 +89,18 @@ def dijkstra_algorithems(CPT, start=0,sim_time=np.inf,sample_time=1,clusters=-1,
     ######################################################################################################
     return dijkstra(edges,n,start) 
     ######################################################################################################
+def cycle_dijkstra(A,point_1,point_2):
+    path_1,prob_1=dijkstra_shortest_path(A.CPT,point_1,point_2)
+    #print(f"Path from {point_1} to {point_2}: {path_1}")
+    #print(f"Probability from {point_1} to {point_2}: {prob_1}")
+    path_2,prob_2=dijkstra_shortest_path(A.CPT,point_2,point_1)
+    #print(f"Path from {point_2} to {point_1}: {path_2}")
+    #print(f"Probability from {point_2} to {point_1}: {prob_2}")
+    prob=np.log(prob_1)+np.log(prob_2)
+    path=path_1+path_2[1:]
+    return path,np.exp(prob)
+def ratio_probability_of_two_point_cycles(A,point_1,point_2,point_3):
+    path_1,prob_1=cycle_dijkstra(A,point_1,point_2)
+
+    path_2,prob_2=cycle_dijkstra(A,point_2,point_3)
+    return prob_1/prob_2
