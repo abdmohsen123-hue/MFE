@@ -300,9 +300,9 @@ def plot_DE_VS_Time(DE,N,dt,colors="black",Path=""):
     #plt.savefig(os.path.join(Path, f"Dissipation_Energy.png"))
     plt.show()
 
-def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):
+def plot_dijkstra_shortest_path(A,data, start, end,k=-1,sim_time=np.inf,sample_time=1):
     
-    spp=dijkstra_shortest_path(CPT,start,end,cluster=k)
+    spp=dijkstra_shortest_path(A,start,end,cluster=k,sim=sim_time,sample=sample_time)
     spp=list(spp[0])
     #print(spp)
     CC=cluster_centroids(CPT,data)
@@ -343,7 +343,53 @@ def plot_dijkstra_shortest_path(CPT,data, start, end,k=-1):
     plt.title(f"Dijkstra's shortest path from cluster {start} to cluster {end}")
     #plt.savefig(os.path.join(Case, f"Dijkstra_shortest_path_{start}_to_{end}.png"))
     plt.show()
+def plot_dijkstra_discretized_shortest_path(A,Data,source,target,Disctrize_box_size=50,sim_time=np.inf,sample_time=1):
+
+    path,prob =dijkstra_shortest_path(A,source,target,sim=sim_time,sample=sample_time)
+
+    Nd=Disctrize_box_size
+    x=Data.copy()      
+    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
+    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
+    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
+    idx = np.floor((x - mini) / delta).astype(int)
+
+    grid = np.zeros((Nd, Nd))
+
+    for i in range(len(idx)):
+        d_idx = idx[i, 0]
+        E_idx = idx[i, 1]
+        grid[d_idx,E_idx] += 1 
+    color="#000204"
+    fig, ax = plt.subplots(figsize=(8, 8),dpi=500)
     
+    it =0
+    for i in range(Nd):
+        for j in range(Nd):
+            if grid[i, j] > 0:
+                # draw cell edges
+                ax.plot([j, j+1], [i, i], linewidth=1,c=color)
+                ax.plot([j, j+1], [i+1, i+1], linewidth=1,c=color)
+                ax.plot([j, j], [i, i+1], linewidth=1,c=color)
+                ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
+                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
+                it+=1
+    c  = ["green"]
+    for i in range(len(path)-2):
+        c.append("lightblue")
+    c.append("red")
+    for box in path:
+        it=0
+        for i in range(Nd):
+            for j in range(Nd):
+                if grid[i, j] > 0:
+                    if it==box:
+                        ax.scatter(j + 0.5, i + 0.5, s=1500/(Nd), color=c[path.index(box)], alpha=1,marker="s")
+                        
+                    it+=1
+    ax.set_xlabel("Δk",fontsize=14)
+    ax.set_ylabel("Δε",fontsize=14)
+    #ax.plot((Data[:, 1]-mini[1])/delta[1], (Data[:, 0]-mini[0])/delta[0],c="black",zorder=1,linewidth=0.3)
 def plot_cluster_distance_matrix(Path,CPT, Data,k=-1):
     CP=CPT[k]
     N=k
@@ -457,53 +503,7 @@ def plot_eigenvectors(Data,P,eigen_value,discretization_box_size):
         fig.canvas.draw_idle()
     slider.on_changed(update)
     plt.show()
-def plot_dijkstra_shortest_path(CPT,Data,source,target,Disctrize_box_size=50):
 
-    path,prob =dijkstra_shortest_path(CPT,source,target)
-
-    Nd=Disctrize_box_size
-    x=Data.copy()      
-    mini = np.min(x, axis=0)        #Extract minimum value of all physical variables 
-    maxi = np.max(x, axis=0)        #Extract maximum value of all physical variables
-    delta=(maxi+10e-12-mini)/Nd            #Discretize the state space into cells
-    idx = np.floor((x - mini) / delta).astype(int)
-
-    grid = np.zeros((Nd, Nd))
-
-    for i in range(len(idx)):
-        d_idx = idx[i, 0]
-        E_idx = idx[i, 1]
-        grid[d_idx,E_idx] += 1 
-    color="#000204"
-    fig, ax = plt.subplots(figsize=(8, 8),dpi=500)
-    
-    it =0
-    for i in range(Nd):
-        for j in range(Nd):
-            if grid[i, j] > 0:
-                # draw cell edges
-                ax.plot([j, j+1], [i, i], linewidth=1,c=color)
-                ax.plot([j, j+1], [i+1, i+1], linewidth=1,c=color)
-                ax.plot([j, j], [i, i+1], linewidth=1,c=color)
-                ax.plot([j+1, j+1], [i, i+1], linewidth=1,c=color)
-                #ax.text(j + 0.5, i + 0.5, str(int(it)), color='black', ha='center', va='center', fontsize=140/Nd)
-                it+=1
-    c  = ["green"]
-    for i in range(len(path)-2):
-        c.append("lightblue")
-    c.append("red")
-    for box in path:
-        it=0
-        for i in range(Nd):
-            for j in range(Nd):
-                if grid[i, j] > 0:
-                    if it==box:
-                        ax.scatter(j + 0.5, i + 0.5, s=1500/(Nd), color=c[path.index(box)], alpha=1,marker="s")
-                        
-                    it+=1
-    ax.set_xlabel("Δk",fontsize=14)
-    ax.set_ylabel("Δε",fontsize=14)
-    #ax.plot((Data[:, 1]-mini[1])/delta[1], (Data[:, 0]-mini[0])/delta[0],c="black",zorder=1,linewidth=0.3)
 
 def plot_cycles_period(Cycles,Data,Disctrize_box_size=50,period=2):
     

@@ -29,6 +29,7 @@ class SnapCluster:
         CPT.append(CP)
         self.CPT=CPT
         self.Box=Box
+        
         self.P=A
         self.mini=mini
         self.maxi=maxi

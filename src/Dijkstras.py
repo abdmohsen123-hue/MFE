@@ -1,7 +1,9 @@
 from src.helper import *
+import sys
 
-def dijkstra_shortest_path(CPT,source,target,cluster=-1,sim=np.inf,sample=1,U_scale=False):
-    A=cluster_transition_matrix(CPT,sim=sim,sample=sample,k=cluster,dt_U_local_inv_dx=U_scale)
+
+def dijkstra_shortest_path(A,source,target,cluster=-1,sim=np.inf,sample=1,U_scale=False):
+    #A=cluster_transition_matrix(CPT,sim=sim,sample=sample,k=cluster,dt_U_local_inv_dx=U_scale)
     W = np.full_like(A, np.inf, dtype=float)
     mask = A > 0
     W[mask] = -np.log(A[mask])
@@ -45,8 +47,8 @@ def dijkstra_shortest_path(CPT,source,target,cluster=-1,sim=np.inf,sample=1,U_sc
     return dijkstra(edges,n,source,target)
     ######################################################################################################
 
-def dijkstra_algorithems(CPT, start=0,sim_time=np.inf,sample_time=1,clusters=-1,U_scale=0):
-    A=cluster_transition_matrix(CPT,k=clusters,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale)
+def dijkstra_algorithems(A, start=0,sim_time=np.inf,sample_time=1,clusters=-1,U_scale=0):
+    #A=cluster_transition_matrix(CPT,k=clusters,sim=sim_time,sample=sample_time,dt_U_local_inv_dx=U_scale)
     W = np.full_like(A, np.inf, dtype=float)
     mask = A > 0
     W[mask] = -np.log(A[mask])
@@ -90,10 +92,10 @@ def dijkstra_algorithems(CPT, start=0,sim_time=np.inf,sample_time=1,clusters=-1,
     return dijkstra(edges,n,start) 
     ######################################################################################################
 def cycle_dijkstra(A,point_1,point_2):
-    path_1,prob_1=dijkstra_shortest_path(A.CPT,point_1,point_2)
+    path_1,prob_1=dijkstra_shortest_path(A,point_1,point_2)
     #print(f"Path from {point_1} to {point_2}: {path_1}")
     #print(f"Probability from {point_1} to {point_2}: {prob_1}")
-    path_2,prob_2=dijkstra_shortest_path(A.CPT,point_2,point_1)
+    path_2,prob_2=dijkstra_shortest_path(A,point_2,point_1)
     #print(f"Path from {point_2} to {point_1}: {path_2}")
     #print(f"Probability from {point_2} to {point_1}: {prob_2}")
     prob=np.log(prob_1)+np.log(prob_2)
@@ -103,4 +105,7 @@ def ratio_probability_of_two_point_cycles(A,point_1,point_2,point_3):
     path_1,prob_1=cycle_dijkstra(A,point_1,point_2)
 
     path_2,prob_2=cycle_dijkstra(A,point_2,point_3)
-    return prob_1/prob_2
+    prob=prob_1/prob_2
+    if np.isinf(prob):
+        prob=sys.float_info.max
+    return prob
