@@ -42,7 +42,7 @@ def dijkstra_shortest_path(A,source,target,cluster=-1,sim=np.inf,sample=1,U_scal
             path.append(current)
             current = parent[current]
         path.reverse()
-        return path, np.exp(-dist[target])
+        return path, -dist[target]
     ######################################################################################################
     return dijkstra(edges,n,source,target)
     ######################################################################################################
@@ -98,14 +98,13 @@ def cycle_dijkstra(A,point_1,point_2):
     path_2,prob_2=dijkstra_shortest_path(A,point_2,point_1)
     #print(f"Path from {point_2} to {point_1}: {path_2}")
     #print(f"Probability from {point_2} to {point_1}: {prob_2}")
-    prob=np.log(prob_1)+np.log(prob_2)
+    prob=prob_1+prob_2
     path=path_1+path_2[1:]
-    return path,np.exp(prob)
+    return path,prob
 def ratio_probability_of_two_point_cycles(A,point_1,point_2,point_3):
     path_1,prob_1=cycle_dijkstra(A,point_1,point_2)
 
     path_2,prob_2=cycle_dijkstra(A,point_2,point_3)
-    prob=prob_1/prob_2
-    if np.isinf(prob):
-        prob=sys.float_info.max
-    return prob
+    log_ratio_prob=prob_1-prob_2
+
+    return log_ratio_prob
